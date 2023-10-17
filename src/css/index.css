@@ -29,4 +29,16 @@ body{
     height: 40px;
     border-radius: 100px;
     background-color: yellow;
+    transition: 100ms ease all;
+}
+
+#btn_pause{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100px;
+    height: 100px;
+    font-size: 2rem;
+    outline: none;
 }

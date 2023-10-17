@@ -1,8 +1,3 @@
-class Box
-{
-    
-}
-
 class Snake
 {
 
@@ -11,53 +6,42 @@ class Snake
     private leftPosition: number;
     private step: number;
 
-    private direction: string;
+    private direction: string = "ArrowRight";
+    private timeStep: number = 70;
+
+    private oldStep: number = 0;
 
     constructor(
         element: Element | null, 
         topPosition: number, 
         leftPosition: number,
-        step: number,
-        direction: string = "ArrowRight"
+        step: number
     ){
         this.element = element;
         this.topPosition = topPosition;
         this.leftPosition = leftPosition;
         this.step = step;
-        this.direction = direction;
     }
 
     move = (direction: string) => {
         if(this.element instanceof HTMLDivElement){
             switch (direction) {
                 case "ArrowUp":
-                    this.direction = "ArrowUp";
-                    clearInterval(this.moveInterval());
-
                     this.topPosition = this.topPosition - this.step;
                     this.element.style.top = this.topPosition + "px";
                 break;
         
                 case "ArrowDown":
-                    this.direction = "ArrowDown";
-                    clearInterval(this.moveInterval());
-
                     this.topPosition = this.topPosition + this.step;
                     this.element.style.top = this.topPosition + "px";
                 break;
 
                 case "ArrowLeft":
-                    this.direction = "ArrowLeft";
-                    clearInterval(this.moveInterval());
-
                     this.leftPosition = this.leftPosition - this.step;
                     this.element.style.left = this.leftPosition + "px";
                 break;
         
                 case "ArrowRight":
-                    this.direction = "ArrowRight";
-                    clearInterval(this.moveInterval());
-
                     this.leftPosition = this.leftPosition + this.step;
                     this.element.style.left = this.leftPosition + "px";
                 break;
@@ -68,20 +52,14 @@ class Snake
         }
 
         if(
-            this.topPosition === 0 || 
-            this.leftPosition === 0 ||
-            this.topPosition === 560 || 
-            this.leftPosition === 560
+            this.topPosition === -10 || 
+            this.leftPosition === -10 ||
+            this.topPosition === 570 || 
+            this.leftPosition === 570
         ){
             this.over();
         }
     }
-
-    moveInterval = ()=>{
-        return setInterval(()=>{
-            this.move(this.direction);
-        }, 500)
-    };
 
     over = ()=>{
         if(this.element instanceof HTMLDivElement){
@@ -93,19 +71,56 @@ class Snake
         }
     }
 
+    stop = ()=>{
+        this.oldStep = this.step;
+        this.step = 0;
+    };
+
+    restart = ()=>{
+        this.step = this.oldStep;
+    };
+
+    moveInterval = setInterval(()=>{
+        this.move(this.direction);
+    }, this.timeStep);
+
+    setMoveInterval = ()=>{
+        this.moveInterval = setInterval(()=>{
+            this.move(this.direction);
+        }, this.timeStep);
+    };
+
+    setDirection = (direction: string = "ArrowLeft") => {
+        this.direction = direction;
+    };
+
     getTopPosition = () => this.topPosition;
     
     getLeftPosition = () => this.leftPosition;
+
+    getStep = ()=> this.step;
 }
 
-const snake = new Snake(
-    document.querySelector("#snake"), 290, 290, 10
-);
+const snake = new Snake(document.querySelector("#snake"), 290, 290, 10);
+const btn_pause = document.querySelector("#btn_pause");
 
-document.addEventListener("keydown", ( event )=>{
-    snake.move(event.code);
+document.addEventListener("keydown", (event)=>{
+    snake.setDirection(event.code);
 });
 
-window.onload = ()=>{
-    snake.moveInterval();
+const startGame = ()=>{
+    clearInterval(snake.moveInterval);
+    snake.setMoveInterval();
 };
+
+if(btn_pause instanceof HTMLButtonElement){
+    btn_pause.addEventListener("click", ()=>{
+        if(snake.getStep() === 0){
+            snake.restart();
+            btn_pause.textContent = "=";
+        } else {
+            snake.stop();
+            btn_pause.textContent = ">";
+        }
+    });
+}
